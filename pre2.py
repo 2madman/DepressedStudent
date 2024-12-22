@@ -34,7 +34,7 @@ def preprocess_student_data(df):
     df = df.copy()
     
     # Drop unnecessary columns
-    columns_to_drop = ['id', 'Profession', 'City', 'Degree']
+    columns_to_drop = ['id', 'City',]
     for col in columns_to_drop:
         if col in df.columns:
             df.drop(col, axis=1, inplace=True)
