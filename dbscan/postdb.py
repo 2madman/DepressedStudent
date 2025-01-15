@@ -82,8 +82,8 @@ class ClusterAnalysis:
 
 def main():
     # Example usage
-    data = read_data("preprocessed_student.csv")
-    dbscan = DBSCAN(eps=0.75, min_samples=30)
+    data = read_data("../preprocessed_student.csv")
+    dbscan = DBSCAN(eps=0.5, min_samples=10)
     labels = dbscan.fit(data)
     
     # Perform analysis

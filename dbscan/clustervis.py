@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from collections import defaultdict
 import time
 
@@ -17,6 +18,33 @@ def read_data(filename):
                 print(f"Warning: Skipping invalid line: {line.strip()}")
                 continue
     return np.array(data)
+
+def perform_pca(X, n_components=2):
+    """Manually perform PCA without using sklearn."""
+    # Center the data
+    X_centered = X - np.mean(X, axis=0)
+    
+    # Compute covariance matrix
+    cov_matrix = np.cov(X_centered.T)
+    
+    # Compute eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+    
+    # Sort eigenvalues and eigenvectors in descending order
+    idx = eigenvalues.argsort()[::-1]
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+    
+    # Select top n_components eigenvectors
+    selected_eigenvectors = eigenvectors[:, :n_components]
+    
+    # Project data onto principal components
+    X_pca = np.dot(X_centered, selected_eigenvectors)
+    
+    # Calculate explained variance ratio
+    explained_variance_ratio = eigenvalues[:n_components] / np.sum(eigenvalues)
+    
+    return X_pca, explained_variance_ratio
 
 class DBSCAN:
     def __init__(self, eps=0.5, min_samples=5):
@@ -84,36 +112,54 @@ class DBSCAN:
                             seed_set.add(neighbor)
                             to_process.append(neighbor)
         
-        # Print final statistics
-        elapsed = time.time() - start_time
-        n_clusters = len(set(self.labels)) - (1 if 0 in self.labels else 0)
-        n_noise = list(self.labels).count(0)
-        
-        print("\nDBSCAN clustering completed:")
-        print(f"Total time: {elapsed:.1f} seconds")
-        print(f"Number of clusters found: {n_clusters}")
-        print(f"Number of noise points: {n_noise}")
-        cluster_sizes = self.get_cluster_sizes()
-        for cluster_id, size in sorted(cluster_sizes.items()):
-            if cluster_id == 0:
-                print(f"Noise points: {size}")
-            else:
-                print(f"Cluster {cluster_id}: {size} points")        
         return self.labels
+
+def visualize_clusters_pca(data, labels):
+    """Visualize clusters after PCA transformation."""
+    # Perform PCA
+    data_pca, explained_variance_ratio = perform_pca(data)
     
-    def get_cluster_sizes(self):
-        """Return a dictionary of cluster sizes."""
-        if self.labels is None:
-            return {}
-        sizes = defaultdict(int)
-        for label in self.labels:
-            sizes[label] += 1
-        return dict(sizes)
+    # Create a scatter plot
+    plt.figure(figsize=(12, 8))
+    
+    # Get unique clusters
+    unique_clusters = np.unique(labels)
+    
+    # Generate colors for clusters
+    colors = ['black'] + [plt.cm.jet(i/float(len(unique_clusters)-1)) 
+                         for i in range(len(unique_clusters)-1)]
+    
+    # Plot each cluster
+    for cluster_id, color in zip(unique_clusters, colors):
+        mask = labels == cluster_id
+        label = 'Noise' if cluster_id == 0 else f'Cluster {cluster_id}'
+        plt.scatter(data_pca[mask, 0], data_pca[mask, 1], 
+                   c=[color], label=label, alpha=0.6)
+
+    plt.title('DBSCAN Clustering Results (PCA)')
+    plt.xlabel(f'First Principal Component\n'
+              f'(Explained Variance Ratio: {explained_variance_ratio[0]:.2%})')
+    plt.ylabel(f'Second Principal Component\n'
+              f'(Explained Variance Ratio: {explained_variance_ratio[1]:.2%})')
+    plt.legend()
+    plt.grid(True)
+    
+    # Add total explained variance in the corner
+    total_var = sum(explained_variance_ratio)
+    plt.text(0.02, 0.98, f'Total Explained Variance: {total_var:.2%}',
+             transform=plt.gca().transAxes, 
+             bbox=dict(facecolor='white', alpha=0.8))
+    
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
-    # Read data (no scaling since data is already normalized)
-    data = read_data("preprocessed_student.csv")
+    # Read data
+    data = read_data("../preprocessed_student.csv")
     
-    # Run DBSCAN with adjusted parameters for normalized data
-    dbscan = DBSCAN(eps=0.45, min_samples=10)
+    # Run DBSCAN
+    dbscan = DBSCAN(eps=0.5, min_samples=10)
     labels = dbscan.fit(data)
+    
+    # Visualize results with PCA
+    visualize_clusters_pca(data, labels)
