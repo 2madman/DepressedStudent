@@ -110,32 +110,6 @@ class DBSCAN:
             sizes[label] += 1
         return dict(sizes)
 
-def visualize_clusters(data, labels):
-    # Create a scatter plot
-    plt.figure(figsize=(10, 8))
-    
-    # Get unique clusters
-    unique_clusters = set(labels)
-    
-    # Plot each cluster with a different color
-    colors = ['black'] + ['#%06X' % np.random.randint(0, 0xFFFFFF) for _ in range(len(unique_clusters)-1)]
-    
-    for cluster_id, color in zip(sorted(list(unique_clusters)), colors):
-        # Get points in the cluster
-        mask = labels == cluster_id
-        cluster_points = data[mask]
-        
-        # Plot points
-        label = 'Noise' if cluster_id == 0 else f'Cluster {cluster_id}'
-        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], 
-                   c=[color], label=label, alpha=0.6)
-
-    plt.title('DBSCAN Clustering Results')
-    plt.xlabel('Feature 1')
-    plt.ylabel('Feature 2')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
 
 
 if __name__ == "__main__":
