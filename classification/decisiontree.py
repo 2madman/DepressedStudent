@@ -201,7 +201,7 @@ def main():
     cv_scores = []
     
     for fold_idx, (X_fold_train, X_fold_val, y_fold_train, y_fold_val) in enumerate(folds, 1):
-        clf = DecisionTreeClassifier(max_depth=4)
+        clf = DecisionTreeClassifier(max_depth=4,min_samples_split= 2)
         clf.fit(X_fold_train, y_fold_train)
         y_fold_pred = clf.predict(X_fold_val)
         

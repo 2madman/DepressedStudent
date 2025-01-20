@@ -81,7 +81,6 @@ class ClusterAnalysis:
                     print(f"  Others std: {feat['other_std']:.3f}")
 
 def main():
-    # Example usage
     data = read_data("../preprocessed_student.csv")
     dbscan = DBSCAN(eps=0.5, min_samples=10)
     labels = dbscan.fit(data)

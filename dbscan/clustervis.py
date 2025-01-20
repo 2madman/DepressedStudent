@@ -137,18 +137,12 @@ def visualize_clusters_pca(data, labels):
                    c=[color], label=label, alpha=0.6)
 
     plt.title('DBSCAN Clustering Results (PCA)')
-    plt.xlabel(f'First Principal Component\n'
-              f'(Explained Variance Ratio: {explained_variance_ratio[0]:.2%})')
-    plt.ylabel(f'Second Principal Component\n'
-              f'(Explained Variance Ratio: {explained_variance_ratio[1]:.2%})')
+    plt.xlabel(f'First Principal Component\n')
+    plt.ylabel(f'Second Principal Component\n')
     plt.legend()
     plt.grid(True)
     
-    # Add total explained variance in the corner
-    total_var = sum(explained_variance_ratio)
-    plt.text(0.02, 0.98, f'Total Explained Variance: {total_var:.2%}',
-             transform=plt.gca().transAxes, 
-             bbox=dict(facecolor='white', alpha=0.8))
+    
     
     plt.tight_layout()
     plt.show()
